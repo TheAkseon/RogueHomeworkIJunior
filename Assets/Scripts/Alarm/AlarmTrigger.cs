@@ -1,71 +1,33 @@
-using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AlarmTrigger : MonoBehaviour
 {
-    [SerializeField] private AudioSource _alarmSound;
+    [SerializeField] private UnityEvent _reached = new UnityEvent();
 
-    private float _maxAlarmVolume = 1.0f;
-    private float _minAlarmVolume = 0.0f;
-    private float _changeVolumeTime = 3.0f;
-    private Alarm[] _alarms;
-
-    private void Awake()
+    public event UnityAction Reached
     {
-        _alarms = gameObject.GetComponentsInChildren<Alarm>();
+        add => _reached.AddListener(value);
+        remove => _reached.RemoveListener(value);
+    }
 
-        foreach (var alarm in _alarms)
+    public bool IsReached { get; private set; }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent<Player>(out Player player))
         {
-            alarm.OnReached += OnAlarmReached;
-            alarm.OnReached += OnAlarmExit;
+            IsReached = true;
+            _reached?.Invoke();
         }
     }
 
-    private void OnDisable()
+    private void OnTriggerExit(Collider other)
     {
-        foreach (var alarm in _alarms)
+        if (other.TryGetComponent<Player>(out Player player))
         {
-            alarm.OnReached -= OnAlarmReached;
-            alarm.OnReached -= OnAlarmExit;
-        }
-    }
-
-    private void Start()
-    {
-        _alarmSound = GetComponent<AudioSource>();
-    }
-
-    private void OnAlarmReached()
-    {
-        foreach (var alarm in _alarms)
-        {
-            if(alarm.IsReached == true)
-            {
-                StartCoroutine(ChangeVolume(_alarmSound.volume, _maxAlarmVolume, _changeVolumeTime));
-            }
-        }
-    }
-
-    private void OnAlarmExit()
-    {
-        foreach (var alarm in _alarms)
-        {
-            if (alarm.IsReached == false)
-            {
-                StartCoroutine(ChangeVolume(_alarmSound.volume, _minAlarmVolume, _changeVolumeTime));
-            }
-        }
-    }
-
-    private IEnumerator ChangeVolume(float startVolume, float endVolume, float changeTime)
-    {
-        float currentTime = 0f;
-
-        while (currentTime < changeTime)
-        {
-            currentTime += Time.deltaTime;
-            _alarmSound.volume = Mathf.MoveTowards(startVolume, endVolume, currentTime / changeTime);
-            yield return null;
+            IsReached = false;
+            _reached?.Invoke();
         }
     }
 }

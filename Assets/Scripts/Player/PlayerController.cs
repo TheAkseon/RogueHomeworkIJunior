@@ -13,6 +13,9 @@ public class PlayerController : MonoBehaviour
     private CharacterController _characterController;
     private Vector3 _moveDirection;
 
+    private const string IsGrounded = "IsGrounded";
+    private const string Speed = "Speed";
+
     private void Start()
     {
         _characterController = GetComponent<CharacterController>();
@@ -65,7 +68,7 @@ public class PlayerController : MonoBehaviour
 
     private void Animate()
     {
-        _animator.SetBool("isGrounded", _characterController.isGrounded);
-        _animator.SetFloat("Speed", (Mathf.Abs(Input.GetAxis("Vertical")) + Mathf.Abs(Input.GetAxis("Horizontal"))));
+        _animator.SetBool(IsGrounded, _characterController.isGrounded);
+        _animator.SetFloat(Speed, (Mathf.Abs(Input.GetAxis("Vertical")) + Mathf.Abs(Input.GetAxis("Horizontal"))));
     }
 }
