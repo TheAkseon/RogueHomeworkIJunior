@@ -9,6 +9,7 @@ public class Alarm : MonoBehaviour
     private float _minAlarmVolume = 0.0f;
     private float _changeVolumeTime = 3.0f;
     private AlarmTrigger[] _alarmsTriggers;
+    private Coroutine _changeVolume;
 
     private void Awake()
     {
@@ -41,7 +42,12 @@ public class Alarm : MonoBehaviour
         {
             if(alarm.IsReached == true)
             {
-                StartCoroutine(ChangeVolume(_alarmSound.volume, _maxAlarmVolume, _changeVolumeTime));
+                if(_changeVolume != null)
+                {
+                    StopCoroutine(_changeVolume);
+                }
+
+                _changeVolume = StartCoroutine(ChangeVolume(_alarmSound.volume, _maxAlarmVolume, _changeVolumeTime));
             }
         }
     }
@@ -52,7 +58,12 @@ public class Alarm : MonoBehaviour
         {
             if (alarm.IsReached == false)
             {
-                StartCoroutine(ChangeVolume(_alarmSound.volume, _minAlarmVolume, _changeVolumeTime));
+                if(_changeVolume != null)
+                {
+                    StopCoroutine(_changeVolume);
+                }
+
+                _changeVolume = StartCoroutine(ChangeVolume(_alarmSound.volume, _minAlarmVolume, _changeVolumeTime));
             }
         }
     }
